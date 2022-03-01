@@ -1,17 +1,19 @@
-let showNumber =20;
+let showNumber =20; // a variable to track the load more 
 const phoneDetailsContainer = document.getElementById("phone-details");
 const loadBtn = document.getElementById("load-btn");
+//Function to get the data from the api using the searched text 
 const phoneFetch = searchText =>{
     fetch(`https://openapi.programming-hero.com/api/phones?search=${searchText}`)
     .then(res => res.json())
     .then(data=> loadPhone(data));
 }
+//an arrow function to load search results
 const loadPhone = phones =>{
     const phoneContainer = document.getElementById("phone-container");
     phoneData= phones.data;
     phoneContainer.innerHTML = "";
     const noResult = document.getElementById("no-result");
-    phoneDetailsContainer.innerHTML=""
+    phoneDetailsContainer.innerHTML="";
     if (phoneData.length ==0){
         noResult.classList.remove("d-none")
         manageResult(0);
@@ -29,7 +31,7 @@ const loadPhone = phones =>{
             <div class="card-body text-center ">
                 <h5 class="card-title d-flex align-items-center justify-content-between">${phone.phone_name}
                 <span><img width="56px"  src="images/${phone.brand}.png" class ="img-fluid" alt=""></span></h5>
-                <button onclick="fecthDetails('${phoneId}')" type="button" class="btn btn-outline-secondary">More Details</button>
+                <button onclick="fecthDetails('${phoneId}')" data-bs-toggle="modal" data-bs-target="#phone-modal" type="button" class="btn btn-outline-secondary">More Details</button>
             </div>
             </div>`
             phoneContainer.appendChild(div)
@@ -38,6 +40,7 @@ const loadPhone = phones =>{
     document.getElementById("phone-container").scrollIntoView({behavior: 'smooth'});
 }
 }
+//a function to display limited amount of results
 const manageResult = number=>{
     const totalResult = [...document.querySelectorAll(".col")]
     for (let index = 0; index < number; index++) {
@@ -57,28 +60,32 @@ const manageResult = number=>{
        loadBtn.classList.remove('d-none');
     }
 }
+//A function to handle loadmore button
 const loadManageResult =()=>{
     showNumber += 20;
     manageResult(showNumber);
 }
+// a functiom to fetch phone details
 const fecthDetails = id =>{
     fetch(`https://openapi.programming-hero.com/api/phone/${id}`)
     .then(res => res.json())
     .then(data=> showDetails(data));
 }
+//arrow function to show the phone details in a modal
 const showDetails = phoneDetails=>{
     const phoneDetailsData = phoneDetails.data;
     const sensors = phoneDetailsData.mainFeatures.sensors;
-    const sensorsList = sensors.join();
+    const sensorsList = sensors.toString();
+    const modalTitle = document.getElementById("title")
     const phoneDetailsDataOther = phoneDetailsData.others;
+    modalTitle.innerText = `${phoneDetails.data.name}`
     phoneDetailsContainer.innerHTML = ""
     const imageDiv = document.createElement('div');
-    imageDiv.classList.add('text-center','col-md-4','col-12');
+    imageDiv.classList.add('d-flex','align-items-center' ,'flex-column');
     imageDiv.innerHTML =` <img src="${phoneDetails.data.image}" class="card-img-top w-75 mx-auto mb-3" alt="...">
     <h3>${phoneDetails.data.name}</h3>`;
     const detailsDiv = document.createElement('div');
-    detailsDiv.classList.add('text-center','col-md-8','col-12','d-flex','align-items-center' ,'flex-column');
-    detailsDiv.innerHTML =`<h4 class='text-secondary'>Release Date : <span class="text-black fs-6" >${phoneDetailsData.releaseDate}</span></h4>
+    detailsDiv.innerHTML =`<h4 class='text-secondary'>Release Date : <span class="text-black fs-6" >${phoneDetailsData.releaseDate==""?"Not Specified":phoneDetailsData.releaseDate}</span></h4>
     <h4 class='text-secondary'>Brand :  <span ><img width="56px"  src="images/${phoneDetailsData.brand} .png" class ="img-fluid" alt=""></span></h4>
     <h4 class='text-secondary'>Processor : <span class="text-black fs-6" >${phoneDetailsData.mainFeatures.chipSet}</span></h4>
     <h4 class='text-secondary'>Display : <span class="text-black fs-6" >${phoneDetailsData.mainFeatures.displaySize}</span></h4>
@@ -92,19 +99,16 @@ const showDetails = phoneDetails=>{
     <h4 class='text-secondary'>Radio : <span class="text-black fs-6" >${phoneDetailsDataOther?phoneDetailsDataOther.Radio:"Not Known"}</span></h4>`;
     phoneDetailsContainer.appendChild(imageDiv);
     phoneDetailsContainer.appendChild(detailsDiv);
-    document.getElementById("phone-details").scrollIntoView({behavior: 'smooth'});
-
-}
+};
+//Search button handler
 document.getElementById("search-btn").addEventListener("click",function(){
     const searchInput = document.getElementById("search-input");
     searchInputText = searchInput.value;
-    searchInput.value = ""
-    phoneFetch(searchInputText);
-})
-
-function pageSearch(){
-    pageSearchInput = document.getElementById("page-search-input");
-    pageSearchInputText = pageSearchInput.value;
-    const a = document.getElementsByTagName('h5')
-    console.log(a);
-}
+    if (searchInputText==""){
+        alert("Please write something before searching");
+    }
+    else{
+        searchInput.value = "";
+        phoneFetch(searchInputText);
+    }
+});
